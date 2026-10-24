@@ -13,7 +13,7 @@ import { DB_NAME } from "./utils/constants.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables from src/.env
+
 dotenv.config({
   path: path.resolve(__dirname, "../.env"),
 });
@@ -40,8 +40,7 @@ const createFaculty = async () => {
     let user = await User.findOne({ email });
 
     if (user) {
-      // Update existing faculty account.
-      // Do not modify facultyAccess.
+    
       user.role = "Faculty";
       user.password = hashedPassword;
 
@@ -49,7 +48,7 @@ const createFaculty = async () => {
 
       console.log("Existing faculty password reset successfully.");
     } else {
-      // Create a new faculty account if it does not exist.
+    
       user = await User.create({
         email,
         password: hashedPassword,

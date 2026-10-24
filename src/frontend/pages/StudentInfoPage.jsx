@@ -35,8 +35,7 @@ function StudentInfoPage() {
           );
         }
 
-        // Support the API response being either an array
-        // or an object containing a data array.
+        
         const students = Array.isArray(result)
           ? result
           : result.data;

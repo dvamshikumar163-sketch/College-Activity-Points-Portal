@@ -58,12 +58,12 @@ const LoginPage = () => {
         sessionStorage.setItem("userRole", data.user.role);
       }
 
-      // Store student ID when available
+  
       if (data.student?._id) {
         sessionStorage.setItem("studentId", data.student._id);
       }
 
-      // Redirect according to the user's role
+    
       if (data.user?.role === "Admin") {
         navigate("/admin-dashboard", { replace: true });
       } else if (data.user?.role === "Faculty") {

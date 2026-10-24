@@ -16,7 +16,7 @@ const createToken = (userId) =>
     { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
   );
 
-// REGISTER STUDENT
+
 router.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;

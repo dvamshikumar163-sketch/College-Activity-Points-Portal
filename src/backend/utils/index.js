@@ -1,23 +1,31 @@
+
 import dns from "node:dns";
-import dotenv from "dotenv"
-import connectDB from "../db/index.js"
+import dotenv from "dotenv";
+import connectDB from "../db/index.js";
+import { app } from "./app.js";
 
-import {app} from "./app.js"
-
+// Load local environment variables for development.
+// Render dashboard environment variables are also available through process.env.
 dotenv.config({
-    path:'./src/.env'
-})
+    path: "./src/.env",
+});
 
-dns.setServers(["10.240.208.119"]);
+// Do not override DNS servers here.
+// Render should use its default DNS configuration.
+
+const PORT = process.env.PORT || 8000;
+
 connectDB()
+    .then(() => {
+        app.on("error", (error) => {
+            console.error("Express server error:", error);
+        });
 
-.then(() => {
-    app.on("error",(error) => {
-        console.log("Error: ",error);
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
     })
-    app.listen(process.env.PORT || 8000, () =>{
-        console.log(`Server is running in port ${process.env.PORT || 8000} `)
-    })})
-.catch((err) => {
-    console.log("MONGO DB connection failed!!!",err)
-})
+    .catch((err) => {
+        console.error("MongoDB connection failed:", err);
+        process.exit(1);
+    });

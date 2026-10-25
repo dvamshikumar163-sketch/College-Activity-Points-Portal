@@ -1,6 +1,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("faculty");
   const [faculty, setFaculty] = useState([]);
@@ -13,12 +15,10 @@ function AdminDashboard() {
   const [password, setPassword] = useState("");
   const [creating, setCreating] = useState(false);
 
-  // Logout admin
   const handleLogout = () => {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("role");
-
     window.location.href = "/login";
   };
 
@@ -33,14 +33,15 @@ function AdminDashboard() {
         throw new Error("Admin token not found. Please log in again.");
       }
 
-      const response = await fetch(
-        "http://localhost:8000/api/admin/faculty",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      if (!API_URL) {
+        throw new Error("API URL is not configured. Please contact the administrator.");
+      }
+
+      const response = await fetch(`${API_URL}/api/admin/faculty`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const result = await response.json();
 
@@ -75,7 +76,7 @@ function AdminDashboard() {
       const enableAccess = !member.facultyAccess;
 
       const response = await fetch(
-        `http://localhost:8000/api/admin/faculty/${member._id}/access`,
+        `${API_URL}/api/admin/faculty/${member._id}/access`,
         {
           method: "PATCH",
           headers: {
@@ -123,17 +124,18 @@ function AdminDashboard() {
         throw new Error("Admin token not found. Please log in again.");
       }
 
-      const response = await fetch(
-        "http://localhost:8000/api/admin/faculty",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      if (!API_URL) {
+        throw new Error("API URL is not configured. Please contact the administrator.");
+      }
+
+      const response = await fetch(`${API_URL}/api/admin/faculty`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
       const result = await response.json();
 
@@ -162,9 +164,7 @@ function AdminDashboard() {
             <h1 className="text-2xl font-bold text-gray-900">
               CollegePoints
             </h1>
-            <p className="text-sm text-gray-500">
-              Admin Dashboard
-            </p>
+            <p className="text-sm text-gray-500">Admin Dashboard</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -294,9 +294,7 @@ function AdminDashboard() {
 
                           <td className="p-3">
                             <button
-                              onClick={() =>
-                                handleToggleAccess(member)
-                              }
+                              onClick={() => handleToggleAccess(member)}
                               disabled={updatingId === member._id}
                               className={`rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 ${
                                 member.facultyAccess
@@ -346,9 +344,7 @@ function AdminDashboard() {
                     id="faculty-email"
                     type="email"
                     value={email}
-                    onChange={(event) =>
-                      setEmail(event.target.value)
-                    }
+                    onChange={(event) => setEmail(event.target.value)}
                     placeholder="faculty@college.edu"
                     required
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-purple-500"
@@ -367,9 +363,7 @@ function AdminDashboard() {
                     id="faculty-password"
                     type="password"
                     value={password}
-                    onChange={(event) =>
-                      setPassword(event.target.value)
-                    }
+                    onChange={(event) => setPassword(event.target.value)}
                     placeholder="Enter a temporary password"
                     minLength={8}
                     required
@@ -398,5 +392,4 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
-
 

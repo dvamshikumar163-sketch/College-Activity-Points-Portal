@@ -17,7 +17,7 @@ function CertificateHistory() {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/certificates/history/${studentId}`,
+          `${import.meta.env.VITE_API_URL}/api/certificates/history/${studentId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

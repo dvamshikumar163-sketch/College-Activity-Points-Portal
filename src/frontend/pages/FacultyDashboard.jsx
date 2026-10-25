@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
-
-const API = "http://localhost:8000/api/certificates";
+const API = `${import.meta.env.VITE_API_URL}/api/certificates`;
 
 function FacultyDashboard() {
   const [certificates, setCertificates] = useState([]);

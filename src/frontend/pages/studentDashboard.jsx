@@ -36,7 +36,7 @@ const StudentDashboard = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:8000/api/students",
+        `${import.meta.env.VITE_API_URL}/api/students`,
         {
           method: "POST",
           headers: {

@@ -22,7 +22,7 @@ function StudentEdit() {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/students",
+          `${import.meta.env.VITE_API_URL}/api/students`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -86,7 +86,7 @@ function StudentEdit() {
       setSaving(true);
 
       const response = await fetch(
-        "http://localhost:8000/api/students/profile/edit",
+        `${import.meta.env.VITE_API_URL}/api/students/profile/edit`,
         {
           method: "PATCH",
           headers: {

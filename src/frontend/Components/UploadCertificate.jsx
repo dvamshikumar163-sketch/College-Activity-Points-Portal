@@ -32,7 +32,7 @@ function UploadCertificate() {
         }
 
         const response = await fetch(
-          "http://localhost:8000/api/students",
+        `${import.meta.env.VITE_API_URL}/api/students`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -102,7 +102,7 @@ function UploadCertificate() {
       setDetails(null);
 
       const response = await fetch(
-        `http://localhost:8000/api/certificates/process/${studentId}`,
+        `${import.meta.env.VITE_API_URL}/api/certificates/process/${studentId}`,
         {
           method: "POST",
           headers: {

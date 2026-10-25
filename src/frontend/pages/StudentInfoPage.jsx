@@ -26,7 +26,7 @@ function StudentInfoPage() {
           throw new Error("Please log in again.");
         }
 
-        const response = await fetch("http://localhost:8000/api/students");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/students`);
         const result = await response.json();
 
         if (!response.ok) {

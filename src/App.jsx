@@ -9,7 +9,7 @@ import UploadCertificate from "./frontend/Components/UploadCertificate";
 import CertificateHistory from "./frontend/Components/CertificateHistory";
 import FacultyDashboard from "./frontend/pages/FacultyDashboard";
 import StudentEdit from "./frontend/Components/studentEdit"
-import AdminDashboard from "./frontend/pages/adminDashboard";
+import AdminDashboard from "./frontend/pages/AdminDashboard.jsx";
 import { Route, Routes, Navigate } from "react-router-dom";
 
 function App() {

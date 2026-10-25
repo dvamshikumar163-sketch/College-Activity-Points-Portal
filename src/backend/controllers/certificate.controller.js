@@ -1,4 +1,5 @@
 
+
 import { spawn } from "node:child_process";
 import { writeFile, unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -183,10 +184,16 @@ export const processCertificate = async (req, res) => {
       "process_certificate.py"
     );
 
+    // Windows uses "python"; Linux/Docker on Render uses "python3".
+    const pythonCommand =
+      process.platform === "win32" ? "python" : "python3";
+
     const details = await new Promise((resolve, reject) => {
-      const python = spawn("python", [pythonScript, tempFilePath], {
-        windowsHide: true,
-      });
+      const python = spawn(
+        pythonCommand,
+        [pythonScript, tempFilePath],
+        { windowsHide: true }
+      );
 
       let stdout = "";
       let stderr = "";
@@ -199,7 +206,13 @@ export const processCertificate = async (req, res) => {
         stderr += data.toString();
       });
 
-      python.on("error", reject);
+      python.on("error", (error) => {
+        reject(
+          new Error(
+            `Unable to start Python (${pythonCommand}): ${error.message}`
+          )
+        );
+      });
 
       python.on("close", (code) => {
         if (code !== 0) {
@@ -256,7 +269,6 @@ export const processCertificate = async (req, res) => {
       req.file.originalname
     );
 
-
     const savedCertificate = await Certificate.create({
       student: studentId,
       activityName:
@@ -278,7 +290,7 @@ export const processCertificate = async (req, res) => {
       certificate: savedCertificate,
     });
   } catch (error) {
-    console.error("Certificate processing failed:", error.message);
+    console.error("Certificate processing failed:", error);
 
     return res.status(500).json({
       success: false,
@@ -291,7 +303,6 @@ export const processCertificate = async (req, res) => {
     }
   }
 };
-
 
 export const getCertificateHistory = async (req, res) => {
   try {
@@ -323,7 +334,6 @@ export const getCertificateHistory = async (req, res) => {
   }
 };
 
-
 export const getPendingCertificates = async (req, res) => {
   try {
     const certificates = await Certificate.find({
@@ -346,7 +356,6 @@ export const getPendingCertificates = async (req, res) => {
     });
   }
 };
-
 
 export const reviewCertificate = async (req, res) => {
   const { certificateId } = req.params;
@@ -390,7 +399,6 @@ export const reviewCertificate = async (req, res) => {
 
   try {
     await session.withTransaction(async () => {
-      // Only review certificates that are still pending.
       const certificate = await Certificate.findOneAndUpdate(
         {
           _id: certificateId,
@@ -438,18 +446,15 @@ export const reviewCertificate = async (req, res) => {
           throw error;
         }
 
-        // Update total activity points.
         student.activityPoints =
           Number(student.activityPoints || 0) + awardedPoints;
 
-        // Ensure categoryPoints is a Mongoose Map.
         if (!(student.categoryPoints instanceof Map)) {
           student.categoryPoints = new Map(
             Object.entries(student.categoryPoints || {})
           );
         }
 
-        // Add points only to this certificate's category.
         const currentCategoryPoints =
           Number(student.categoryPoints.get(category)) || 0;
 
@@ -488,6 +493,3 @@ export const reviewCertificate = async (req, res) => {
     await session.endSession();
   }
 };
-
-
-

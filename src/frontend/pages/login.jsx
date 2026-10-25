@@ -1,6 +1,9 @@
 
+
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
+const API_URL = import.meta.env.VITE_API_URL?.trim();
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -17,27 +20,43 @@ const LoginPage = () => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
+    if (!API_URL) {
+      setMessage(
+        "Backend URL is missing. Please check the Vercel VITE_API_URL environment variable and redeploy."
+      );
+      console.error("VITE_API_URL is not configured in this build.");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: normalizedEmail,
-            password,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          password,
+        }),
+      });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = {};
+
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error(
+            `The server returned an invalid response (HTTP ${response.status}).`
+          );
+        }
+      }
 
       if (!response.ok) {
-        setMessage(data.message || "Login failed.");
+        setMessage(data.message || `Login failed (HTTP ${response.status}).`);
         return;
       }
 
@@ -46,24 +65,20 @@ const LoginPage = () => {
         return;
       }
 
-      
       sessionStorage.setItem("token", data.token);
       sessionStorage.setItem(
         "userEmail",
         data.user?.email || normalizedEmail
       );
 
-      
       if (data.user?.role) {
         sessionStorage.setItem("userRole", data.user.role);
       }
 
-  
       if (data.student?._id) {
         sessionStorage.setItem("studentId", data.student._id);
       }
 
-    
       if (data.user?.role === "Admin") {
         navigate("/admin-dashboard", { replace: true });
       } else if (data.user?.role === "Faculty") {
@@ -72,11 +87,13 @@ const LoginPage = () => {
         navigate("/studentHome", { replace: true });
       } else {
         sessionStorage.clear();
-        setMessage("Unrecognized user role. Please contact the administrator.");
+        setMessage(
+          "Unrecognized user role. Please contact the administrator."
+        );
       }
     } catch (error) {
       console.error("Login error:", error);
-      setMessage("Cannot connect to the backend. Please try again.");
+      setMessage(error.message || "Cannot connect to the backend. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -110,7 +127,6 @@ const LoginPage = () => {
             >
               Email Address
             </label>
-
             <input
               id="email"
               type="email"
@@ -130,7 +146,6 @@ const LoginPage = () => {
             >
               Password
             </label>
-
             <input
               id="password"
               type="password"
@@ -167,4 +182,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

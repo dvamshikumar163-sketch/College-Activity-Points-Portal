@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL?.trim();
-
+console.log("Backend URL:", import.meta.env.VITE_API_URL);
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();

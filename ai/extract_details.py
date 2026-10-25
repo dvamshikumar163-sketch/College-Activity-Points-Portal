@@ -1,5 +1,6 @@
 
 
+
 import json
 import os
 import requests
@@ -10,6 +11,7 @@ OLLAMA_BASE_URL = os.getenv(
 ).rstrip("/")
 
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
+OLLAMA_PROXY_TOKEN = os.getenv("OLLAMA_PROXY_TOKEN", "").strip()
 
 
 def extract_details(text):
@@ -34,15 +36,24 @@ Certificate text:
 {text}
 """
 
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    # Send authentication when using the protected Cloudflare proxy.
+    if OLLAMA_PROXY_TOKEN:
+        headers["Authorization"] = f"Bearer {OLLAMA_PROXY_TOKEN}"
+
     response = requests.post(
         f"{OLLAMA_BASE_URL}/api/generate",
+        headers=headers,
         json={
             "model": OLLAMA_MODEL,
             "prompt": prompt,
             "stream": False,
             "format": "json",
         },
-        timeout=120,
+        timeout=180,
     )
 
     response.raise_for_status()
@@ -56,7 +67,6 @@ Certificate text:
         "date",
     ]
 
-    # Keep exactly the expected fields.
     details = {key: details.get(key) for key in required_keys}
 
     for key, value in details.items():
@@ -79,4 +89,3 @@ if __name__ == "__main__":
         print("Ollama connection failed:", error)
     except (json.JSONDecodeError, KeyError) as error:
         print("Could not parse the AI response:", error)
-

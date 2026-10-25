@@ -1,5 +1,7 @@
 
+
 PyMuPDF
 pytesseract
 Pillow
 opencv-python-headless
+requests

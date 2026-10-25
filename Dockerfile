@@ -12,10 +12,15 @@ RUN npm install
 
 COPY . .
 
-RUN pip3 install --break-system-packages -r requirements.txt
+# Install Python dependencies explicitly
+RUN python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
+    && python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt \
+    && python3 -m pip install --break-system-packages --no-cache-dir PyMuPDF
 
-EXPOSE 8000
+# Verify that the exact Python runtime can import PyMuPDF
+RUN python3 -c "import pymupdf; print('PyMuPDF installed successfully')"
+
+EXPOSE 10000
 
 CMD ["npm", "start"]
-
 

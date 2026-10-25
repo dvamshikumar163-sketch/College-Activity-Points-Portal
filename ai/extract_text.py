@@ -1,4 +1,5 @@
 
+
 import os
 import sys
 import shutil
@@ -7,16 +8,22 @@ import pytesseract
 from PIL import Image, ImageOps
 from io import BytesIO
 
+
 # Configure Tesseract for Windows and Linux (Render Docker).
 if os.name == "nt":
-    windows_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    windows_tesseract = (
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    )
 
     if os.path.isfile(windows_tesseract):
         pytesseract.pytesseract.tesseract_cmd = windows_tesseract
     else:
         tesseract_path = shutil.which("tesseract")
-        if tesseract_path:
-            pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        if not tesseract_path:
+            raise RuntimeError(
+                "Tesseract OCR is not installed or not available in PATH."
+            )
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
 else:
     tesseract_path = shutil.which("tesseract")
 
@@ -26,6 +33,11 @@ else:
         )
 
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
+
+print(
+    f"Tesseract executable: {pytesseract.pytesseract.tesseract_cmd}",
+    file=sys.stderr,
+)
 
 
 def extract_from_image(image):
@@ -42,7 +54,7 @@ def extract_from_pdf(pdf_path):
         for page_number, page in enumerate(document, start=1):
             text = page.get_text().strip()
 
-            # Use OCR if the PDF page has no selectable text.
+            # Use OCR when the PDF page has no selectable text.
             if not text:
                 pix = page.get_pixmap(dpi=300, alpha=False)
                 image = Image.open(BytesIO(pix.tobytes("png")))
@@ -83,12 +95,10 @@ if __name__ == "__main__":
         extracted_text = extract_certificate(sys.argv[1])
         print(extracted_text)
 
-        if not extracted_text:
+        if not extracted_text.strip():
             print("No text was detected.", file=sys.stderr)
             sys.exit(1)
 
     except Exception as error:
         print(f"Error: {error}", file=sys.stderr)
         sys.exit(1)
-
-
